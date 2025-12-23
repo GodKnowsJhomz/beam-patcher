@@ -133,7 +133,7 @@ Tauri-based desktop application providing:
 
 ```bash
 # Clone repository
-cd patchergame
+cd beam-patcher
 
 # Build release version
 cargo build --release
