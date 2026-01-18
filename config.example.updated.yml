@@ -1,0 +1,295 @@
+# Beam Patcher Configuration File
+# Version: 1.0.0
+# Last Updated: 2026-01-18
+# 
+# This configuration file controls the behavior and appearance of Beam Patcher.
+# All URLs should use HTTPS for security unless testing locally.
+
+# ============================================================================
+# APPLICATION SETTINGS
+# ============================================================================
+app:
+  # Display name shown in patcher window
+  name: "Beam Patcher"
+  
+  # Current version of your patcher configuration
+  version: "1.0.0"
+  
+  # Window title (appears in title bar)
+  window_title: "Beam Patcher - Modern RO Patcher"
+  
+  # Game installation directory (null = current directory)
+  # Example: "C:/Program Files/MyRO" or null
+  game_directory: null
+  
+  # Main game executable filename
+  client_exe: "Ragnarok.exe"
+  
+  # Setup/configuration executable filename
+  setup_exe: "setup.exe"
+  
+  # Auto-play background music on patcher start
+  bgm_autoplay: false
+  
+  # Background music file path (null = no BGM)
+  # Supported formats: MP3, OGG, WAV
+  # Example: "assets/bgm.mp3"
+  bgm_file: null
+  
+  # Server name displayed in UI
+  server_name: "MyRO Server"
+  
+  # Enable video background (resource intensive)
+  video_background_enabled: false
+  
+  # Video file for background (null = no video)
+  # Supported formats: MP4, WEBM
+  # Example: "assets/trailer.mp4"
+  video_background_file: null
+  
+  # Grid images for visual showcase (slideshow)
+  # Example:
+  # grid_images:
+  #   - "assets/screenshot1.png"
+  #   - "assets/screenshot2.png"
+  #   - "assets/screenshot3.png"
+  grid_images: null
+  
+  # Discord server invite URL
+  # Example: "https://discord.gg/DeMpCu2Q"
+  discord_url: "https://discord.gg/DeMpCu2Q"
+  
+  # Registration page URL
+  # Example: "https://yourserver.com/register"
+  register_url: null
+  
+  # Social media links
+  # Example:
+  # social_links:
+  #   - name: "Facebook"
+  #     icon: "facebook-logo"
+  #     url: "https://facebook.com/yourpage"
+  #   - name: "Twitter"
+  #     icon: "twitter-logo"
+  #     url: "https://twitter.com/yourhandle"
+  social_links: null
+  
+  # Limited/featured items showcase
+  # Example:
+  # limited_items:
+  #   - image_url: "assets/item1.png"
+  #     label: "LIMITED ITEM"
+  #   - image_url: "https://yourserver.com/item2.png"
+  #     label: "NEW ITEM"
+  limited_items: null
+
+# ============================================================================
+# PATCHER SETTINGS
+# ============================================================================
+patcher:
+  # Mirror servers for patch downloads
+  # Multiple mirrors provide redundancy and load balancing
+  # Priority: 1 = highest (tried first), 2+ = fallback servers
+  mirrors:
+    - name: "Primary Mirror"
+      url: "https://patch.yourserver.com"
+      priority: 1
+    
+    - name: "Secondary Mirror"
+      url: "https://patch2.yourserver.com"
+      priority: 2
+    
+    - name: "Backup Mirror"
+      url: "https://patch3.yourserver.com"
+      priority: 3
+  
+  # URL to patchlist.txt file
+  # Format: Each line contains patch filename
+  # Example content:
+  #   001_initial.beam
+  #   002_update.beam
+  #   003_hotfix.beam
+  patch_list_url: "https://patch.yourserver.com/patchlist.txt"
+  
+  # Target GRF file to patch (for THOR/RGZ format compatibility)
+  # Common values: "data.grf", "rdata.grf", "sdata.grf"
+  target_grf: "data.grf"
+  
+  # Allow users to manually load and apply patch files
+  allow_manual_patch: true
+  
+  # Verify file checksums after download
+  # Recommended: true (ensures file integrity)
+  verify_checksums: true
+
+# ============================================================================
+# USER INTERFACE SETTINGS
+# ============================================================================
+ui:
+  # Theme name (currently only "default" supported)
+  theme: "default"
+  
+  # Custom CSS file for advanced styling (null = use default theme)
+  # Example: "themes/custom.css"
+  custom_css: null
+  
+  # Custom logo image path (null = default logo)
+  # Example: "assets/logo.png"
+  logo: null
+  
+  # Custom background image path (null = default background)
+  # Example: "assets/background.jpg"
+  background: null
+  
+  # Show download progress bar
+  show_progress: true
+  
+  # Show list of files being patched
+  show_file_list: true
+  
+  # News feed URL (RSS/JSON)
+  # Returns array of news items with: title, content, date
+  # Example: "https://yourserver.com/api/news"
+  news_feed_url: null
+  
+  # Server status API URL (returns online/offline status)
+  # Example: "https://yourserver.com/api/status"
+  server_status_url: null
+  
+  # Server status indicator image
+  # Example: "assets/server-online.png"
+  status_image_url: null
+  
+  # Custom buttons (additional actions)
+  # Example:
+  # custom_buttons:
+  #   - label: "Wiki"
+  #     url: "https://wiki.yourserver.com"
+  #   - label: "Shop"
+  #     url: "https://shop.yourserver.com"
+  custom_buttons: []
+  
+  # Window layout configuration
+  layout:
+    # Window width in pixels
+    width: 800
+    
+    # Window height in pixels
+    height: 600
+    
+    # Use custom HTML layout (advanced)
+    use_custom_layout: false
+
+# ============================================================================
+# SINGLE SIGN-ON (SSO) SETTINGS
+# ============================================================================
+sso:
+  # Enable SSO authentication
+  enabled: false
+  
+  # OAuth2 authorization endpoint
+  # Example: "https://auth.yourserver.com/oauth/authorize"
+  login_url: "https://auth.yourserver.com/oauth/authorize"
+  
+  # OAuth2 token endpoint
+  # Example: "https://auth.yourserver.com/oauth/token"
+  token_url: "https://auth.yourserver.com/oauth/token"
+  
+  # OAuth2 client ID
+  client_id: "beam-patcher"
+  
+  # OAuth2 redirect URI (must match server configuration)
+  redirect_uri: "http://localhost:8080/callback"
+
+# ============================================================================
+# AUTO-UPDATER SETTINGS
+# ============================================================================
+updater:
+  # Enable patcher self-update feature
+  enabled: true
+  
+  # Version check URL (JSON format)
+  # Returns: { "version": "1.0.1", "download_url": "...", "changelog": "..." }
+  # Example: "https://patch.yourserver.com/version.json"
+  check_url: "https://patch.yourserver.com/version.json"
+  
+  # Base URL for patcher updates
+  # Example: "https://patch.yourserver.com/patcher"
+  update_url: "https://patch.yourserver.com/updates"
+  
+  # Automatically download and install updates
+  # false = notify user and ask permission
+  auto_update: false
+
+# ============================================================================
+# PATCH FORMAT SUPPORT
+# ============================================================================
+# Beam Patcher supports multiple patch formats:
+#
+# 1. BEAM (.beam) - Native format
+#    - Fastest performance
+#    - Zstd compression (better than Zlib)
+#    - MD5 verification built-in
+#    - Recommended for new servers
+#
+# 2. THOR (.thor) - RO Standard format
+#    - Compatible with GRF Editor
+#    - Compatible with Thor Patcher
+#    - Zlib compression
+#    - Automatic root/ prefix for proper structure
+#
+# 3. RGZ (.rgz) - Alternative RO format
+#    - Compatible with GRF Editor
+#    - Gzip compression
+#    - Automatic root/ prefix for proper structure
+#
+# 4. GRF (.grf) - Full GRF replacement
+#    - Standard Ragnarok GRF format
+#    - Zlib compression
+#    - Use for complete data replacement
+#
+# ============================================================================
+
+# ============================================================================
+# PATCHLIST.TXT FORMAT
+# ============================================================================
+# The patchlist.txt file lists all patches to download and apply.
+# 
+# Format (one patch per line):
+#   001_initial.beam
+#   002_update.beam
+#   003_hotfix.beam
+#
+# Comments (lines starting with #) are ignored.
+# Patches are applied in the order listed.
+#
+# Naming convention (recommended):
+#   [number]_[description].[format]
+#   Example: 001_initial_release.beam
+#            002_new_maps.thor
+#            003_bug_fixes.beam
+# ============================================================================
+
+# ============================================================================
+# VERSION.JSON FORMAT (for auto-updater)
+# ============================================================================
+# Example version.json:
+# {
+#   "version": "1.0.1",
+#   "required": false,
+#   "download_url": "https://patch.yourserver.com/patcher/BeamPatcher-1.0.1.exe",
+#   "changelog": "- Fixed patching bug\n- Improved performance\n- Added new features",
+#   "sha256": "abc123..."
+# }
+# ============================================================================
+
+# ============================================================================
+# NOTES
+# ============================================================================
+# - All URLs must be accessible without authentication (unless using SSO)
+# - Use HTTPS for production servers (security best practice)
+# - Test configuration with local server before deploying
+# - Keep backup of working configuration
+# - Monitor server logs for download errors
+# - Optimize images/videos for faster loading
+# ============================================================================

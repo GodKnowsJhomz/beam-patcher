@@ -13,6 +13,11 @@
   "tauri": {
     "allowlist": {
       "all": false,
+      "http": {
+        "all": true,
+        "request": true,
+        "scope": ["https://goatmmo.com/**", "https://**", "http://**"]
+      },
       "fs": {
         "all": false,
         "readFile": true,
@@ -37,9 +42,7 @@
         "close": true,
         "hide": true,
         "show": true,
-        "maximize": true,
         "minimize": true,
-        "unmaximize": true,
         "unminimize": true,
         "startDragging": true
       }
@@ -74,7 +77,7 @@
       {
         "title": "Beam Patcher - Advanced RO Launcher",
         "width": 900,
-        "height": 600,
+        "height": 620,
         "resizable": false,
         "fullscreen": false,
         "decorations": false

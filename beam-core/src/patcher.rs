@@ -1,4 +1,5 @@
 use crate::{Config, Downloader, Error, Result};
+use crate::downloader::PatchInfo;
 use beam_formats::{grf::Grf, gpf::Gpf, rgz::Rgz, thor::Thor, beam::BeamArchive};
 use std::path::{Path, PathBuf};
 use tracing::{debug, info, warn};
@@ -20,6 +21,57 @@ impl Patcher {
             downloader,
             temp_dir,
         })
+    }
+    
+    pub async fn check_available_patches(&self) -> Result<usize> {
+        info!("Checking for available patches");
+        
+        let patches = self.downloader.download_patch_list().await?;
+        let patch_count = patches.len();
+        
+        if patch_count > 0 {
+            info!("Found {} patches available for download", patch_count);
+        } else {
+            info!("No patches available, client is up to date");
+        }
+        
+        Ok(patch_count)
+    }
+    
+    pub async fn get_patch_list(&self) -> Result<Vec<PatchInfo>> {
+        self.downloader.download_patch_list().await
+    }
+    
+    pub async fn download_and_apply_patch<F>(
+        &self,
+        patch: &PatchInfo,
+        progress_callback: F,
+    ) -> Result<()>
+    where
+        F: FnMut(u64, u64) + Send + 'static,
+    {
+        let patch_path = self.temp_dir.join(&patch.filename);
+        
+        self.downloader
+            .download_file_with_progress(&patch.filename, &patch_path, progress_callback)
+            .await?;
+        
+        if let Some(checksum) = &patch.checksum {
+            if !self.downloader.verify_checksum(&patch_path, checksum).await? {
+                return Err(Error::PatchFailed(format!(
+                    "Checksum mismatch for {}",
+                    patch.filename
+                )));
+            }
+        }
+        
+        self.apply_patch(&patch_path).await?;
+        
+        self.downloader.mark_patch_applied(&patch.filename)?;
+        
+        tokio::fs::remove_file(&patch_path).await?;
+        
+        Ok(())
     }
     
     pub async fn run_full_patch(&self) -> Result<()> {
@@ -47,6 +99,8 @@ impl Patcher {
             }
             
             self.apply_patch(&patch_path).await?;
+            
+            self.downloader.mark_patch_applied(&patch.filename)?;
             
             tokio::fs::remove_file(&patch_path).await?;
         }
@@ -93,8 +147,14 @@ impl Patcher {
             }
             
             let data = beam.extract_file(filename)?;
-            info!("Patching file: {} ({} bytes)", filename, data.len());
-            grf.patch_file(filename, &data)?;
+            
+            let entry = beam.get_entry(filename)
+                .ok_or_else(|| Error::PatchFailed(format!("Entry not found: {}", filename)))?;
+            
+            let grf_filename = entry.grf_path.as_ref().unwrap_or(&entry.filename);
+            
+            info!("Patching file: {} -> {} ({} bytes)", filename, grf_filename, data.len());
+            grf.patch_file(grf_filename, &data)?;
         }
         
         info!("Saving GRF file table...");
@@ -188,7 +248,8 @@ impl Patcher {
             let path = Path::new(game_dir).join(grf_filename);
             Ok(path)
         } else {
-            Ok(PathBuf::from(grf_filename))
+            let exe_dir = crate::get_executable_dir()?;
+            Ok(exe_dir.join(grf_filename))
         }
     }
     

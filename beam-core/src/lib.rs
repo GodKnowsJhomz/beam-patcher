@@ -11,7 +11,7 @@ pub mod server_checker;
 pub mod client_checker;
 
 pub use config::Config;
-pub use downloader::Downloader;
+pub use downloader::{Downloader, PatchInfo};
 pub use patcher::Patcher;
 pub use updater::Updater;
 pub use sso::SsoClient;
@@ -21,3 +21,15 @@ pub use parallel_downloader::ParallelDownloader;
 pub use game_settings::{GameSettings, GameSettingsManager};
 pub use server_checker::{ServerChecker, ServerStatusResult};
 pub use client_checker::{ClientChecker, ClientStatusResult};
+
+use std::path::PathBuf;
+
+pub fn get_executable_dir() -> Result<PathBuf> {
+    std::env::current_exe()?
+        .parent()
+        .ok_or_else(|| Error::Io(std::io::Error::new(
+            std::io::ErrorKind::NotFound,
+            "Failed to get executable directory"
+        )))
+        .map(|p| p.to_path_buf())
+}

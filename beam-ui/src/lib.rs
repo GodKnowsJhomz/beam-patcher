@@ -39,6 +39,7 @@ pub fn run_ui(config: Config) -> Result<()> {
     tauri::Builder::default()
         .manage(app_state)
         .invoke_handler(tauri::generate_handler![
+            commands::check_patches_available,
             commands::start_patching,
             commands::check_updates,
             commands::perform_update,
@@ -51,11 +52,16 @@ pub fn run_ui(config: Config) -> Result<()> {
             commands::get_server_status,
             commands::get_client_status,
             commands::verify_game_files,
+            commands::select_game_directory,
             commands::set_game_directory,
             commands::get_game_directory,
+            commands::check_initial_setup,
             commands::apply_game_settings,
             commands::load_game_settings,
             commands::resolve_resource_path,
+            commands::open_setup,
+            commands::manual_patch,
+            commands::reset_cache,
         ])
         .run(tauri::generate_context!("tauri.conf.json"))
         .expect("error while running tauri application");

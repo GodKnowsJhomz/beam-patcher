@@ -13,6 +13,7 @@ const HEADER_SIZE: usize = 64;
 #[derive(Debug, Clone)]
 pub struct BeamEntry {
     pub filename: String,
+    pub grf_path: Option<String>,
     pub md5_hash: [u8; 16],
     pub compressed_size: u32,
     pub uncompressed_size: u32,
@@ -84,10 +85,23 @@ impl BeamArchive {
             file.read_exact(&mut offset_buf)?;
             let offset = u64::from_le_bytes(offset_buf);
             
+            let mut grf_path_len_buf = [0u8; 1];
+            file.read_exact(&mut grf_path_len_buf)?;
+            let grf_path_len = grf_path_len_buf[0] as usize;
+            
+            let grf_path = if grf_path_len > 0 {
+                let mut grf_path_buf = vec![0u8; grf_path_len];
+                file.read_exact(&mut grf_path_buf)?;
+                Some(String::from_utf8_lossy(&grf_path_buf).to_string())
+            } else {
+                None
+            };
+            
             entries.insert(
                 filename.clone(),
                 BeamEntry {
                     filename,
+                    grf_path,
                     md5_hash,
                     compressed_size,
                     uncompressed_size,
@@ -118,6 +132,7 @@ impl BeamArchive {
             filename.to_string(),
             BeamEntry {
                 filename: filename.to_string(),
+                grf_path: None,
                 md5_hash,
                 compressed_size: compressed_data.len() as u32,
                 uncompressed_size: data.len() as u32,
@@ -131,6 +146,31 @@ impl BeamArchive {
     pub fn add_file_from_path<P: AsRef<Path>>(&mut self, file_path: P, archive_path: &str) -> Result<()> {
         let data = std::fs::read(file_path)?;
         self.add_file(archive_path, &data)
+    }
+
+    pub fn add_file_with_grf_path(&mut self, filename: &str, grf_path: &str, data: &[u8]) -> Result<()> {
+        let digest = md5::compute(data);
+        let md5_hash: [u8; 16] = digest.0;
+        
+        let mut encoder = ZlibEncoder::new(Vec::new(), Compression::default());
+        encoder.write_all(data)?;
+        let compressed_data = encoder.finish()?;
+        
+        self.file_data.insert(filename.to_string(), data.to_vec());
+        
+        self.entries.insert(
+            filename.to_string(),
+            BeamEntry {
+                filename: filename.to_string(),
+                grf_path: Some(grf_path.to_string()),
+                md5_hash,
+                compressed_size: compressed_data.len() as u32,
+                uncompressed_size: data.len() as u32,
+                offset: 0,
+            },
+        );
+        
+        Ok(())
     }
 
     pub fn extract_file(&self, filename: &str) -> Result<Vec<u8>> {
@@ -182,6 +222,10 @@ impl BeamArchive {
             data_offset += 4; // compressed_size
             data_offset += 4; // uncompressed_size
             data_offset += 8; // offset
+            data_offset += 1; // grf_path_len
+            if let Some(grf_path) = &entry.grf_path {
+                data_offset += grf_path.len() as u64;
+            }
         }
         
         let mut current_offset = data_offset;
@@ -210,6 +254,13 @@ impl BeamArchive {
             file.write_all(&entry.compressed_size.to_le_bytes())?;
             file.write_all(&entry.uncompressed_size.to_le_bytes())?;
             file.write_all(&current_offset.to_le_bytes())?;
+            
+            if let Some(grf_path) = &entry.grf_path {
+                file.write_all(&[grf_path.len() as u8])?;
+                file.write_all(grf_path.as_bytes())?;
+            } else {
+                file.write_all(&[0u8])?;
+            }
             
             entry.offset = current_offset;
             current_offset += entry.compressed_size as u64;

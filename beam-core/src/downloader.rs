@@ -6,10 +6,12 @@ use std::path::{Path, PathBuf};
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
 use tracing::{debug, info, warn};
+use std::collections::HashSet;
 
 pub struct Downloader {
     client: Client,
     config: Config,
+    cache_file: PathBuf,
 }
 
 impl Downloader {
@@ -23,7 +25,56 @@ impl Downloader {
             .pool_max_idle_per_host(10)
             .build()?;
         
-        Ok(Downloader { client, config })
+        let cache_file = if let Some(game_dir) = &config.app.game_directory {
+            Path::new(game_dir).join(".patch_cache").join("applied_patches.txt")
+        } else {
+            let exe_dir = crate::get_executable_dir()?;
+            exe_dir.join(".patch_cache").join("applied_patches.txt")
+        };
+        
+        if let Some(parent) = cache_file.parent() {
+            std::fs::create_dir_all(parent)?;
+        }
+        
+        Ok(Downloader { client, config, cache_file })
+    }
+    
+    fn load_applied_patches(&self) -> Result<HashSet<String>> {
+        let mut applied = HashSet::new();
+        
+        if self.cache_file.exists() {
+            let content = std::fs::read_to_string(&self.cache_file)?;
+            for line in content.lines() {
+                let line = line.trim();
+                if !line.is_empty() {
+                    applied.insert(line.to_string());
+                }
+            }
+        }
+        
+        Ok(applied)
+    }
+    
+    pub fn mark_patch_applied(&self, filename: &str) -> Result<()> {
+        let mut applied = self.load_applied_patches()?;
+        applied.insert(filename.to_string());
+        
+        let content = applied.iter()
+            .map(|s| s.as_str())
+            .collect::<Vec<_>>()
+            .join("\n");
+        
+        std::fs::write(&self.cache_file, content)?;
+        info!("Marked patch as applied: {}", filename);
+        
+        Ok(())
+    }
+    
+    pub fn clear_cache(&self) -> Result<()> {
+        if self.cache_file.exists() {
+            std::fs::remove_file(&self.cache_file)?;
+        }
+        Ok(())
     }
     
     pub async fn download_file(
@@ -114,10 +165,21 @@ impl Downloader {
         }
         
         let content = response.text().await?;
-        let patches = self.parse_patch_list(&content)?;
+        let all_patches = self.parse_patch_list(&content)?;
         
-        info!("Found {} patches", patches.len());
-        Ok(patches)
+        let applied_patches = self.load_applied_patches()?;
+        
+        let pending_patches: Vec<PatchInfo> = all_patches
+            .into_iter()
+            .filter(|patch| !applied_patches.contains(&patch.filename))
+            .collect();
+        
+        info!("Found {} total patches, {} already applied, {} pending", 
+              pending_patches.len() + applied_patches.len(),
+              applied_patches.len(),
+              pending_patches.len());
+        
+        Ok(pending_patches)
     }
     
     fn parse_patch_list(&self, content: &str) -> Result<Vec<PatchInfo>> {
@@ -140,8 +202,13 @@ impl Downloader {
             } else {
                 None
             };
+            let size = if parts.len() > 2 {
+                parts[2].parse::<u64>().ok()
+            } else {
+                None
+            };
             
-            patches.push(PatchInfo { filename, checksum });
+            patches.push(PatchInfo { filename, checksum, size });
         }
         
         Ok(patches)
@@ -160,10 +227,86 @@ impl Downloader {
         
         Ok(hash == expected)
     }
+    
+    pub async fn download_file_with_progress<F>(
+        &self,
+        filename: &str,
+        destination: &Path,
+        mut progress_callback: F,
+    ) -> Result<PathBuf>
+    where
+        F: FnMut(u64, u64) + Send + 'static,
+    {
+        let mut mirrors = self.config.patcher.mirrors.clone();
+        mirrors.sort_by_key(|m| m.priority);
+        
+        let mut last_error = None;
+        
+        for mirror in &mirrors {
+            if mirror.url.is_empty() {
+                warn!("Skipping mirror {} with empty URL", mirror.name);
+                continue;
+            }
+            
+            let url = format!("{}/{}", mirror.url, filename);
+            info!("Attempting download from mirror: {} ({})", mirror.name, url);
+            
+            match self.download_from_url_with_progress(&url, destination, &mut progress_callback).await {
+                Ok(path) => {
+                    info!("Successfully downloaded from mirror: {}", mirror.name);
+                    return Ok(path);
+                }
+                Err(e) => {
+                    warn!("Failed to download from mirror {}: {}", mirror.name, e);
+                    last_error = Some(e);
+                }
+            }
+        }
+        
+        Err(last_error.unwrap_or_else(|| {
+            Error::DownloadFailed("All mirrors failed".to_string())
+        }))
+    }
+    
+    async fn download_from_url_with_progress<F>(
+        &self,
+        url: &str,
+        destination: &Path,
+        progress_callback: &mut F,
+    ) -> Result<PathBuf>
+    where
+        F: FnMut(u64, u64),
+    {
+        let response = self.client.get(url).send().await?;
+        
+        if !response.status().is_success() {
+            return Err(Error::DownloadFailed(format!(
+                "HTTP error: {}",
+                response.status()
+            )));
+        }
+        
+        let total_size = response.content_length().unwrap_or(0);
+        let mut downloaded = 0u64;
+        
+        let mut file = File::create(destination).await?;
+        let mut stream = response.bytes_stream();
+        
+        while let Some(chunk) = stream.next().await {
+            let chunk = chunk?;
+            file.write_all(&chunk).await?;
+            downloaded += chunk.len() as u64;
+            progress_callback(downloaded, total_size);
+        }
+        
+        file.flush().await?;
+        Ok(destination.to_path_buf())
+    }
 }
 
 #[derive(Debug, Clone)]
 pub struct PatchInfo {
     pub filename: String,
     pub checksum: Option<String>,
+    pub size: Option<u64>,
 }

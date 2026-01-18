@@ -30,13 +30,21 @@ pub struct Verifier {
     #[allow(dead_code)]
     config: Config,
     manifest_url: String,
+    base_dir: PathBuf,
 }
 
 impl Verifier {
     pub fn new(config: Config, manifest_url: String) -> Result<Self> {
+        let base_dir = if let Some(game_dir) = &config.app.game_directory {
+            PathBuf::from(game_dir)
+        } else {
+            crate::get_executable_dir()?
+        };
+        
         Ok(Verifier {
             config,
             manifest_url,
+            base_dir,
         })
     }
     
@@ -52,7 +60,7 @@ impl Verifier {
         };
         
         for file_entry in &manifest.files {
-            let file_path = PathBuf::from(&file_entry.path);
+            let file_path = self.base_dir.join(&file_entry.path);
             
             if !file_path.exists() {
                 warn!("Missing file: {}", file_entry.path);

@@ -10,8 +10,10 @@ A powerful, cross-platform game patcher for Ragnarok Online built with Rust and 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Rust](https://img.shields.io/badge/rust-%23000000.svg?style=flat&logo=rust&logoColor=white)](https://www.rust-lang.org/)
 [![Tauri](https://img.shields.io/badge/tauri-%2324C8DB.svg?style=flat&logo=tauri&logoColor=%23FFFFFF)](https://tauri.app/)
+[![Discord](https://img.shields.io/discord/YOUR_DISCORD_ID?color=7289da&label=Discord&logo=discord&logoColor=white)](https://discord.gg/DeMpCu2Q)
+[![GitHub](https://img.shields.io/badge/GitHub-beamguides%2Fbeam--patcher-181717?logo=github)](https://github.com/beamguides/beam-patcher)
 
-[Features](#features) • [Installation](#installation) • [Documentation](#configuration) • [Contributing](#contributing) • [Support](#support)
+[Features](#features) • [Installation](#installation) • [Documentation](#configuration) • [Discord](https://discord.gg/DeMpCu2Q) • [Support](#support)
 
 ---
 
@@ -133,7 +135,7 @@ Tauri-based desktop application providing:
 
 ```bash
 # Clone repository
-cd beam-patcher
+cd patchergame
 
 # Build release version
 cargo build --release
@@ -468,6 +470,65 @@ GRF (Game Resource File) is the primary archive format for Ragnarok Online.
 - ✅ Cross-platform compatibility
 - ✅ Built-in corruption detection
 
+## Development
+
+### Project Structure
+
+```
+patchergame/
+├── beam-core/                 # Core library
+│   ├── src/
+│   │   ├── config.rs         # Configuration management
+│   │   ├── downloader.rs     # HTTP downloader
+│   │   ├── parallel_downloader.rs  # Multi-threaded downloader
+│   │   ├── patcher.rs        # Patch engine
+│   │   ├── verifier.rs       # Checksum verification
+│   │   ├── updater.rs        # Auto-updater
+│   │   ├── sso.rs            # SSO client
+│   │   ├── game_settings.rs  # Game config
+│   │   ├── server_checker.rs # Server status
+│   │   ├── client_checker.rs # Client validation
+│   │   ├── error.rs          # Error types
+│   │   └── lib.rs
+│   └── Cargo.toml
+│
+├── beam-formats/              # Format implementations
+│   ├── src/
+│   │   ├── grf.rs            # GRF reader/writer
+│   │   ├── beam.rs           # BEAM format
+│   │   ├── error.rs          # Format errors
+│   │   └── lib.rs
+│   │   
+│   └── Cargo.toml
+│
+├── beam-patcher/              # Main executable
+│   ├── src/
+│   │   └── main.rs           # Entry point & CLI
+│   └── Cargo.toml
+│
+├── beam-ui/                   # GUI application
+│   ├── src/
+│   │   └── main.rs           # Tauri app
+│   ├── public/                # Web assets
+│   │   ├── index.html
+│   │   └── assets/
+│   ├── tauri.conf.json       # Tauri config
+│   └── Cargo.toml
+│
+├── examples/                  # Example files
+│   ├── news.json
+│   ├── status.json
+│   └── README.txt
+│
+├── Cargo.toml                 # Workspace config
+├── Cargo.lock
+├── config.example.yml         # Example configuration
+├── config.production.yml      # Production example
+├── patchlist.example.txt      # Example patchlist
+├── version.example.json       # Example version info
+└── README.md                  # This file
+```
+
 ### Building
 
 ```bash
@@ -655,8 +716,9 @@ You may choose either license for your use.
 
 ## Authors & Credits
 
-**Created by:** [@beamguide](https://github.com/beamguide)  
-**Discord:** beamguide#9797
+**Created by:** [@beamguides](https://github.com/beamguides)  
+**Discord Server:** https://discord.gg/DeMpCu2Q  
+**GitHub:** https://github.com/beamguides/beam-patcher
 
 This project is open source and maintained by the Ragnarok Online private server community.
 
@@ -669,17 +731,19 @@ This project is open source and maintained by the Ragnarok Online private server
 ## Support
 
 **For Users:**
-- 📖 Check the [documentation](docs/) for setup guides
-- 💬 Join [GitHub Discussions](../../discussions) for Q&A
-- 🐛 Report issues on [GitHub Issues](../../issues)
+- 📖 Check the [Configuration Guide](CONFIGURATION_GUIDE.md) for setup guides
+- 📋 Check the [Quick Reference](QUICK_REFERENCE.md) for common tasks
+- 💬 Join our [Discord Server](https://discord.gg/DeMpCu2Q) for Q&A
+- 🐛 Report issues on [GitHub Issues](https://github.com/beamguides/beam-patcher/issues)
 
 **For Server Owners:**
-- See [Configuration Guide](docs/CONFIGURATION.md) for server setup
-- See [Theme Guide](docs/THEMES.md) for custom branding
+- See [Configuration Guide](CONFIGURATION_GUIDE.md) for server setup
+- See [Quick Reference](QUICK_REFERENCE.md) for common tasks
+- See [Theme Guide](themes/README.md) for custom branding
 
 **For Developers:**
-- See [Building Guide](docs/BUILDING.md) for development setup
 - See [Contributing Guide](CONTRIBUTING.md) for contribution guidelines
+- Visit [GitHub Repository](https://github.com/beamguides/beam-patcher)
 
 ---
 

@@ -18,16 +18,15 @@ tauri = { version = "1.5", features = [
     "dialog-open",
     "dialog-save",
     "fs-read-file",
+    "http-all",
     "protocol-asset",
     "shell-open", 
     "updater",
     "window-close",
     "window-hide",
-    "window-maximize",
     "window-minimize",
     "window-show",
     "window-start-dragging",
-    "window-unmaximize",
     "window-unminimize"
 ] }
 

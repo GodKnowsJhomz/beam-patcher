@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beam Patcher - Advanced RO Launcher</title>
+    <title>GoatMMO Patcher</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
         * {
             margin: 0;
@@ -11,11 +15,87 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --bg: #0a0e1a;
+            --panel: #0f1525;
+            --glass: rgba(15, 21, 37, 0.85);
+            --border: rgba(255, 255, 255, 0.12);
+            --border-glow: rgba(99, 102, 241, 0.3);
+            --blue: #6366f1;
+            --blue2: #4f46e5;
+            --blue-glow: rgba(99, 102, 241, 0.4);
+            --indigo: #6366f1;
+            --indigo-dark: #4f46e5;
+            --indigo-glow: rgba(79, 70, 229, 0.5);
+            --text: #f1f5f9;
+            --text-bright: #ffffff;
+            --muted: #94a3b8;
+            --green: #10b981;
+            --green-glow: rgba(16, 185, 129, 0.5);
+            --orange: #f59e0b;
+            --orange-glow: rgba(245, 158, 11, 0.4);
+            --purple-glow: rgba(139, 92, 246, 0.3);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes glowPulse {
+            0%, 100% {
+                box-shadow: 0 0 20px var(--blue-glow), 0 0 40px var(--blue-glow), 0 0 60px var(--blue-glow);
+            }
+            50% {
+                box-shadow: 0 0 30px var(--blue-glow), 0 0 60px var(--blue-glow), 0 0 90px var(--blue-glow);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -1000px 0;
+            }
+            100% {
+                background-position: 1000px 0;
+            }
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             width: 100vw;
             height: 100vh;
             overflow: hidden;
+            background: linear-gradient(135deg, #0a0e1a 0%, #1a1f3a 100%);
+            color: var(--text);
+            animation: fadeIn 1s ease-out;
         }
 
         #video-background {
@@ -25,466 +105,1140 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            z-index: -2;
+            filter: brightness(0.5) contrast(1.1);
+            animation: fadeIn 2s ease-out;
+        }
+
+        .video-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(245, 158, 11, 0.08) 0%, transparent 50%),
+                linear-gradient(135deg, rgba(10, 14, 26, 0.3) 0%, rgba(26, 31, 58, 0.2) 100%);
+            backdrop-filter: none;
             z-index: -1;
         }
 
-        .launcher-container {
+        .patcher-container {
             width: 100%;
             height: 100%;
             display: flex;
             flex-direction: column;
-            position: relative;
         }
 
+        /* Header */
         .header {
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(10px);
-            padding: 0;
+            height: 40px;
+            background: linear-gradient(180deg, rgba(15, 21, 37, 0.95) 0%, rgba(15, 21, 37, 0.85) 100%);
+            backdrop-filter: blur(20px) saturate(180%);
+            padding: 0 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            height: 40px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.5), transparent);
         }
 
         .header-drag {
             flex: 1;
-            height: 100%;
             display: flex;
             align-items: center;
-            padding: 0 15px;
+            gap: 10px;
             cursor: move;
         }
 
-        .app-title {
-            font-weight: 600;
-            color: white;
-            font-size: 13px;
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .logo-text {
+            font-size: 14px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             letter-spacing: 1px;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
         }
 
         .window-controls {
             display: flex;
-            height: 100%;
+            gap: 6px;
+            opacity: 1;
         }
 
         .window-btn {
-            width: 45px;
-            height: 100%;
+            width: 36px;
+            height: 32px;
             border: none;
-            background: transparent;
-            color: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.9);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 13px;
+            border: 1px solid transparent;
         }
 
         .window-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.15);
             color: white;
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
         .window-btn-close:hover {
-            background: #ef4444;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
             color: white;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
         }
 
-        .window-btn svg {
-            width: 16px;
-            height: 16px;
-            stroke: currentColor;
-            fill: none;
-            stroke-width: 2;
-            stroke-linecap: round;
-        }
-
+        /* Main Content */
         .main-content {
             flex: 1;
+            padding: 16px;
             display: flex;
-            flex-direction: column;
+            align-items: center;
             justify-content: center;
-            align-items: center;
-            padding: 30px;
-            gap: 20px;
-        }
-
-        .server-title {
-            font-size: 48px;
-            font-weight: 900;
-            color: white;
-            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.9);
-            letter-spacing: 3px;
-            margin-bottom: 10px;
-        }
-
-        .status-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            width: 100%;
-            max-width: 600px;
-            margin: 20px 0;
-        }
-
-        .status-card {
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 12px;
-            padding: 15px 20px;
-        }
-
-        .status-card-header {
-            font-size: 11px;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.6);
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-bottom: 12px;
-        }
-
-        .status-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 6px 0;
-        }
-
-        .status-label {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 13px;
-        }
-
-        .status-value {
-            color: white;
-            font-weight: 600;
-            font-size: 13px;
-        }
-
-        .status-online {
-            color: #10b981;
-        }
-
-        .status-offline {
-            color: #ef4444;
-        }
-
-        .buttons-container {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.4);
-            transform: translateY(-2px);
-        }
-
-        .progress-container {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(15px);
-            padding: 15px 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .progress-info {
-            flex: 1;
-        }
-
-        .progress-label {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 12px;
-            font-weight: 500;
-            margin-bottom: 6px;
-        }
-
-        .progress-bar-bg {
-            width: 100%;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
+            animation: fadeIn 1.2s ease-out 0.2s both;
             overflow: hidden;
         }
 
-        .progress-bar {
+        .content-panel {
+            max-width: 100%;
+            width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, #10b981, #3b82f6);
-            width: 0%;
-            transition: width 0.3s;
+            background: transparent;
+            border: none;
+            border-radius: 18px;
+            padding: 12px;
+            backdrop-filter: none;
+            box-shadow: none;
+            position: relative;
+            animation: slideInLeft 0.8s ease-out 0.4s both;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content-panel::before {
+            display: none;
+        }
+
+        /* Top Grid */
+        .top-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 10px;
+            margin-bottom: 0;
+            height: 360px;
+            flex-shrink: 0;
+        }
+
+        /* Left Side - News Section Main */
+        .news-section-main {
+            background: transparent;
+            border: none;
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            height: 100%;
+            box-shadow: none;
+            animation: slideInLeft 0.8s ease-out 0.6s both;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+        }
+
+        .news-filter-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-shrink: 0;
+        }
+
+        .filter-btn {
+            flex: 1;
+            padding: 10px 14px;
+            background: rgba(15, 21, 37, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .filter-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(79, 70, 229, 0.2) 100%);
+            border-color: var(--blue);
+            color: white;
+            box-shadow: 
+                0 4px 15px rgba(99, 102, 241, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .filter-btn:hover {
+            border-color: var(--blue);
+            background: rgba(99, 102, 241, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        .filter-btn:hover::before {
+            left: 100%;
+        }
+
+        .news-cards-wrapper {
+            position: relative;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .news-cards-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            padding-right: 8px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(99, 102, 241, 0.5) rgba(15, 21, 37, 0.3);
+        }
+
+        .news-cards-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .news-cards-container::-webkit-scrollbar-track {
+            background: rgba(15, 21, 37, 0.3);
             border-radius: 3px;
         }
 
-        .btn-start {
-            padding: 12px 50px;
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 14px;
+        .news-cards-container::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.5);
+            border-radius: 3px;
+        }
+
+        .news-cards-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.7);
+        }
+
+        .news-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(15, 21, 37, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 10px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            flex-shrink: 0;
+        }
+
+        .news-item:hover {
+            background: rgba(15, 21, 37, 0.6);
+            border-color: rgba(99, 102, 241, 0.5);
+            transform: translateX(4px);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+        }
+
+        .news-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 14px;
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
-        .btn-start:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+        .news-badge.event {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
         }
 
-        .btn-start:disabled {
-            background: rgba(100, 116, 139, 0.5);
-            cursor: not-allowed;
-            box-shadow: none;
+        .news-badge.promo {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
         }
 
-        .modal {
+        .news-badge.update {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .news-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .news-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #ffffff;
+            line-height: 1.4;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .news-date {
+            font-size: 11px;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        .loading {
+            color: var(--muted);
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+        }
+
+        /* Image Preview Modal */
+        .image-modal {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(5px);
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
             z-index: 1000;
             align-items: center;
             justify-content: center;
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.3s ease-out;
         }
 
-        .modal.active {
+        .image-modal.active {
             display: flex;
         }
 
-        .modal-content {
-            background: rgba(20, 20, 30, 0.95);
-            backdrop-filter: blur(20px);
-            padding: 30px;
-            border-radius: 15px;
-            width: 450px;
+        .image-modal-content {
+            position: relative;
             max-width: 90%;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-height: 90%;
+            animation: scaleIn 0.3s ease-out;
         }
 
-        .modal-header {
-            font-size: 20px;
-            font-weight: 700;
-            color: white;
-            margin-bottom: 20px;
-        }
-
-        .setting-item {
-            margin-bottom: 18px;
-        }
-
-        .setting-label {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 13px;
-            margin-bottom: 8px;
-            display: block;
-        }
-
-        .setting-select {
+        .image-modal-content img {
             width: 100%;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
-            color: white;
-            font-size: 13px;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
         }
 
-        .setting-checkbox {
+        .image-modal-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            width: 40px;
+            height: 40px;
+            background: rgba(15, 21, 37, 0.9);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .image-modal-close:hover {
+            background: rgba(239, 68, 68, 0.9);
+            border-color: #ef4444;
+            transform: scale(1.1);
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Right Side - Image Grid */
+        .image-grid-section {
+            display: flex;
+            flex-direction: column;
+            animation: slideInRight 0.8s ease-out 0.6s both;
+            height: 100%;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 10px;
+            height: 100%;
+        }
+
+        .grid-image-item {
+            background: rgba(2, 6, 23, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 4px 15px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            aspect-ratio: 1 / 1;
+            min-height: 0;
+            min-width: 0;
+        }
+
+        .grid-image-item:hover {
+            transform: translateY(-2px);
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 
+                0 8px 25px rgba(0, 0, 0, 0.4),
+                0 0 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .grid-image-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: brightness(0.8) contrast(1.1);
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        .grid-image-item:hover img {
+            transform: scale(1.1);
+            filter: brightness(0.9) contrast(1.2);
+        }
+
+        /* Bottom Section */
+        .bottom-section {
+            display: grid;
+            grid-template-columns: 160px 1fr;
+            gap: 10px;
+            flex: 1;
+            align-items: end;
+            margin-top: auto;
+        }
+
+        /* Server Status - Left */
+        .server-status {
+            background: 
+                linear-gradient(135deg, rgba(15, 21, 37, 0.3) 0%, rgba(26, 31, 58, 0.25) 100%),
+                rgba(15, 21, 37, 0.2);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 12px;
+            backdrop-filter: blur(12px) saturate(180%);
+            box-shadow: 
+                0 8px 25px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            animation: slideInLeft 0.8s ease-out 0.8s both;
+            height: fit-content;
+        }
+
+        .server-status-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+
+        .server-status-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .server-status-item {
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .setting-checkbox input {
-            width: 18px;
-            height: 18px;
+        .server-name {
+            font-size: 13px;
+            color: var(--text);
+            flex: 1;
         }
 
-        .modal-buttons {
+        .status-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 
+                0 0 10px rgba(16, 185, 129, 0.8),
+                0 0 20px rgba(16, 185, 129, 0.4);
+            animation: glowPulse 2s ease-in-out infinite;
+        }
+
+        .status-dot.offline {
+            background: #ef4444;
+            box-shadow: 
+                0 0 10px rgba(239, 68, 68, 0.8),
+                0 0 20px rgba(239, 68, 68, 0.4);
+            animation: glowPulse 2s ease-in-out infinite;
+        }
+
+        .status-text {
+            font-size: 12px;
+            color: var(--green);
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+
+        .status-text.offline {
+            color: #ef4444;
+            text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+        
+        /* Server Status Image */
+        .server-status-image-container {
+            background: 
+                linear-gradient(135deg, rgba(15, 21, 37, 0.3) 0%, rgba(26, 31, 58, 0.25) 100%),
+                rgba(15, 21, 37, 0.2);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 12px;
+            backdrop-filter: blur(12px) saturate(180%);
+            box-shadow: 
+                0 8px 25px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            animation: slideInLeft 0.8s ease-out 0.8s both;
+            height: fit-content;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .status-image {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            object-fit: contain;
+        }
+        
+        .status-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+        
+        .status-placeholder i {
+            font-size: 32px;
+            opacity: 0.5;
+        }
+
+        /* Progress - Right */
+        .progress-section {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            animation: slideInRight 0.8s ease-out 1s both;
+        }
+
+        .progress-label {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 10px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 7px;
+            background: rgba(15, 21, 37, 0.7);
+            border-radius: 999px;
+            overflow: hidden;
+            margin-bottom: 12px;
+            box-shadow: 
+                inset 0 2px 4px rgba(0, 0, 0, 0.4),
+                0 1px 0 rgba(255, 255, 255, 0.05);
+            position: relative;
+        }
+
+        .progress-bar-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255, 255, 255, 0.1) 50%, 
+                transparent 100%);
+            animation: shimmer 2s infinite;
+            border-radius: 999px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, 
+                #6366f1 0%, 
+                #4f46e5 50%, 
+                #6366f1 100%);
+            background-size: 200% 100%;
+            width: 0%;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 999px;
+            box-shadow: 
+                0 0 15px rgba(99, 102, 241, 0.6),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.3), 
+                transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        .button-row {
             display: flex;
             gap: 10px;
-            margin-top: 25px;
+            justify-content: center;
+            align-items: flex-end;
+            animation: slideInRight 0.8s ease-out 1s both;
         }
 
-        .btn-primary {
-            flex: 1;
-            padding: 12px;
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            color: white;
+        .btn-play-now {
+            height: 38px;
+            padding: 0 32px;
+            background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 50%, #2563eb 100%);
+            color: #ffffff;
             border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
+            border-radius: 11px;
+            font-weight: 700;
             font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            box-shadow: 
+                0 4px 20px rgba(59, 130, 246, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
+        .btn-play-now::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, transparent 100%);
+            pointer-events: none;
         }
 
-        .btn-secondary {
-            flex: 1;
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.1);
+        .btn-play-now::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s;
+        }
+
+        .btn-play-now:hover {
+            background: linear-gradient(180deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
+            transform: translateY(-3px);
+            box-shadow: 
+                0 8px 35px rgba(59, 130, 246, 0.7),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-play-now:hover::after {
+            left: 100%;
+        }
+
+        .btn-play-now:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-play-now:disabled {
+            background: linear-gradient(135deg, rgba(100, 116, 139, 0.4) 0%, rgba(71, 85, 105, 0.4) 100%);
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .btn-action-small {
+            width: 38px;
+            height: 38px;
+            background: rgba(15, 21, 37, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 11px;
             color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            font-weight: 500;
             cursor: pointer;
-            font-size: 13px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
         }
 
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.15);
+        .btn-action-small::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(99, 102, 241, 0.2), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .btn-action-small:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: var(--blue);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 
+                0 6px 20px rgba(99, 102, 241, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-action-small:hover::before {
+            opacity: 1;
+        }
+
+        /* Volume Controls Inline */
+        .volume-controls-inline {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            position: relative;
+        }
+
+        .volume-slider-inline {
+            -webkit-appearance: slider-vertical;
+            writing-mode: bt-lr;
+            width: 4px;
+            height: 0;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(15, 21, 37, 0.8);
+            border-radius: 2px;
+            outline: none;
+            backdrop-filter: blur(10px);
+            position: absolute;
+            bottom: 48px;
+        }
+
+        .volume-controls-inline:hover .volume-slider-inline {
+            height: 80px;
+            opacity: 1;
+        }
+
+        .volume-slider-inline::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .volume-slider-inline::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Register Button */
+        .btn-register {
+            height: 38px;
+            padding: 0 32px;
+            background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 50%, #2563eb 100%);
+            border: none;
+            border-radius: 11px;
+            color: white;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            box-shadow: 
+                0 4px 20px rgba(59, 130, 246, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-register::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, transparent 100%);
+            pointer-events: none;
+        }
+
+        .btn-register::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s;
+        }
+
+        .btn-register:hover {
+            background: linear-gradient(180deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
+            transform: translateY(-3px);
+            box-shadow: 
+                0 8px 35px rgba(59, 130, 246, 0.7),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-register:hover::after {
+            left: 100%;
+        }
+
+        .btn-register:active {
+            transform: translateY(-1px);
+        }
+
+        /* Social Buttons Inline */
+        .social-buttons-inline {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .social-btn-inline {
+            width: 40px;
+            height: 40px;
+            background: rgba(15, 21, 37, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+
+        .social-btn-inline:hover {
+            background: rgba(99, 102, 241, 0.3);
+            border-color: var(--blue);
+            transform: scale(1.1);
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: var(--muted);
+            font-size: 14px;
+            font-weight: 500;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.8s ease-out;
+            position: relative;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(99, 102, 241, 0.8), 
+                transparent);
+            border-radius: 2px;
+            animation: shimmer 1.5s infinite;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .top-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .bottom-section {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <video id="video-background" autoplay loop muted playsinline></video>
+    <div class="video-overlay"></div>
 
-    <div class="launcher-container">
+    <div class="patcher-container">
+        <!-- Header -->
         <div class="header">
             <div class="header-drag" data-tauri-drag-region>
-                <div class="app-title" id="header-title">BEAM PATCHER</div>
+                <div class="logo-container">
+                    <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Aries Symbol - Minimal Ram Horns -->
+                        <path d="M8 18C8 18 6 16 5 13C4 10 4 6 6 4" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M16 18C16 18 18 16 19 13C20 10 20 6 18 4" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="6" cy="4" r="1.5" fill="#f59e0b"/>
+                        <circle cx="18" cy="4" r="1.5" fill="#f59e0b"/>
+                    </svg>
+                    <span class="logo-text" id="logo-text">GOATMMO</span>
+                </div>
             </div>
             <div class="window-controls">
-                <button class="window-btn window-btn-minimize" onclick="minimizeWindow()" title="Minimize">
-                    <svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg>
+                <button class="window-btn" onclick="minimizeWindow()" title="Minimize">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10" stroke="currentColor" stroke-width="2"/></svg>
                 </button>
                 <button class="window-btn window-btn-close" onclick="closeWindow()" title="Close">
-                    <svg viewBox="0 0 24 24"><path d="M6 6l12 12M6 18L18 6"/></svg>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M3 13L13 3" stroke="currentColor" stroke-width="2"/></svg>
                 </button>
             </div>
         </div>
 
+        <!-- Main Content -->
         <div class="main-content">
-            <div class="server-title" id="server-title">GOAT MMO</div>
+            <div class="content-panel">
+                <!-- Top Grid -->
+                <div class="top-grid">
+                    <!-- Left: News Section -->
+                    <div class="news-section-main">
+                        <div class="news-filter-buttons">
+                            <button class="filter-btn active" onclick="filterNews('event')">
+                                <i class="ph ph-calendar-blank"></i> Event
+                            </button>
+                            <button class="filter-btn" onclick="filterNews('promo')">
+                                <i class="ph ph-gift"></i> Promo
+                            </button>
+                            <button class="filter-btn" onclick="filterNews('update')">
+                                <i class="ph ph-megaphone"></i> Update
+                            </button>
+                        </div>
+                        <div class="news-cards-wrapper">
+                            <div class="news-cards-container" id="news-cards">
+                                <div class="loading">Loading news...</div>
+                            </div>
+                        </div>
+                    </div>
 
-            <div class="status-container">
-                <div class="status-card">
-                    <div class="status-card-header">Server Status</div>
-                    <div class="status-item">
-                        <span class="status-label">Login:</span>
-                        <span class="status-value status-online" id="login-status">Online</span>
-                    </div>
-                    <div class="status-item">
-                        <span class="status-label">Char:</span>
-                        <span class="status-value status-online" id="char-status">Online</span>
-                    </div>
-                    <div class="status-item">
-                        <span class="status-label">Map:</span>
-                        <span class="status-value status-online" id="map-status">Online</span>
+                    <!-- Right: Image Grid 2x2 -->
+                    <div class="image-grid-section">
+                        <div class="image-grid" id="image-grid">
+                            <div class="grid-image-item" onclick="openImageModal(document.getElementById('grid-img-1').src)">
+                                <img src="" alt="Image 1" id="grid-img-1" oncontextmenu="return false">
+                            </div>
+                            <div class="grid-image-item" onclick="openImageModal(document.getElementById('grid-img-2').src)">
+                                <img src="" alt="Image 2" id="grid-img-2" oncontextmenu="return false">
+                            </div>
+                            <div class="grid-image-item" onclick="openImageModal(document.getElementById('grid-img-3').src)">
+                                <img src="" alt="Image 3" id="grid-img-3" oncontextmenu="return false">
+                            </div>
+                            <div class="grid-image-item" onclick="openImageModal(document.getElementById('grid-img-4').src)">
+                                <img src="" alt="Image 4" id="grid-img-4" oncontextmenu="return false">
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="status-card">
-                    <div class="status-card-header">Client Status</div>
-                    <div class="status-item">
-                        <span class="status-label">Client:</span>
-                        <span class="status-value" id="client-exe-status">Loading...</span>
+                <!-- Bottom Grid -->
+                <div class="bottom-section">
+                    <!-- Server Status Image -->
+                    <div class="server-status-image-container" id="server-status-image-container">
+                        <img src="" alt="Server Status" id="status-image" class="status-image" oncontextmenu="return false" style="display: none;">
+                        <div class="status-placeholder" id="status-placeholder">
+                            <i class="ph ph-image"></i>
+                            <span>Server Status</span>
+                        </div>
                     </div>
-                    <div class="status-item">
-                        <span class="status-label" id="server-name-label">Files:</span>
-                        <span class="status-value" id="server-status">Loading...</span>
+
+                    <!-- Progress & Buttons -->
+                    <div class="progress-section">
+                        <div class="progress-label" id="progress-label">Ready to patch… 0% (0 MB / 0 GB)</div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="progress-bar"></div>
+                        </div>
+                        <div class="button-row">
+                            <button class="btn-play-now" id="play-button" onclick="handlePlayButton()">Play Now</button>
+                            <button class="btn-register" id="register-btn-main" title="Register">Register</button>
+                            <button class="btn-action-small" onclick="openSetup()" title="Settings"><i class="ph ph-gear"></i></button>
+                            <button class="btn-action-small" onclick="manualPatch()" title="Manual Patch"><i class="ph ph-folder-open"></i></button>
+                            <button class="btn-action-small" onclick="resetCache()" title="Reset Cache"><i class="ph ph-arrow-clockwise"></i></button>
+                            <div class="social-buttons-inline" id="social-buttons-container"></div>
+                            <div class="volume-controls-inline">
+                                <input type="range" min="0" max="100" value="30" class="volume-slider-inline" id="volume-slider" oninput="changeVolume(this.value)" orient="vertical">
+                                <button class="social-btn-inline" id="mute-btn" onclick="toggleMute()" title="Mute/Unmute">
+                                    <i class="ph ph-speaker-high" id="volume-icon"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="status-item">
-                        <span class="status-label">Players:</span>
-                        <span class="status-value" id="players-online">0</span>
-                    </div>
                 </div>
-            </div>
-
-            <div class="buttons-container">
-                <button class="btn" onclick="openModal('settings')">⚙️ Settings</button>
-                <button class="btn" onclick="selectGameDirectory()">📁 Game Folder</button>
-                <button class="btn" onclick="repairGame()">🔧 Repair</button>
-            </div>
-        </div>
-
-        <div class="progress-container">
-            <div class="progress-info">
-                <div class="progress-label" id="status-message">Ready to patch</div>
-                <div class="progress-bar-bg">
-                    <div class="progress-bar" id="progress-bar"></div>
-                </div>
-            </div>
-            <button class="btn-start" id="start-button" onclick="handleStartButton()">START</button>
-        </div>
-    </div>
-
-    <div class="modal" id="settings-modal">
-        <div class="modal-content">
-            <div class="modal-header">⚙️ Game Settings</div>
-            <div class="setting-item">
-                <label class="setting-label">Resolution</label>
-                <select class="setting-select" id="resolution">
-                    <option value="800x600">800 x 600</option>
-                    <option value="1024x768">1024 x 768</option>
-                    <option value="1280x720">1280 x 720 (HD)</option>
-                    <option value="1920x1080" selected>1920 x 1080 (Full HD)</option>
-                </select>
-            </div>
-            <div class="setting-item">
-                <label class="setting-label">Graphics Mode</label>
-                <select class="setting-select" id="graphics-mode">
-                    <option value="windowed">Windowed</option>
-                    <option value="fullscreen">Fullscreen</option>
-                    <option value="borderless">Borderless Window</option>
-                </select>
-            </div>
-            <div class="setting-item">
-                <div class="setting-checkbox">
-                    <input type="checkbox" id="sound-enabled" checked>
-                    <label class="setting-label" style="margin: 0">Enable Sound</label>
-                </div>
-            </div>
-            <div class="setting-item">
-                <div class="setting-checkbox">
-                    <input type="checkbox" id="bgm-enabled" checked>
-                    <label class="setting-label" style="margin: 0">Enable BGM</label>
-                </div>
-            </div>
-            <div class="modal-buttons">
-                <button class="btn-primary" onclick="saveSettings()">Save Settings</button>
-                <button class="btn-secondary" onclick="closeModal()">Cancel</button>
             </div>
         </div>
     </div>
+
+    <!-- Image Preview Modal -->
+    <div class="image-modal" id="image-modal" onclick="closeImageModal()">
+        <div class="image-modal-content" onclick="event.stopPropagation()">
+            <button class="image-modal-close" onclick="closeImageModal()">
+                <i class="ph ph-x"></i>
+            </button>
+            <img src="" alt="Preview" id="modal-image" oncontextmenu="return false">
+        </div>
+    </div>
+
+
 
     <script>
-        const { invoke } = window.__TAURI__.tauri;
-        const { appWindow } = window.__TAURI__.window;
+        // Check if running in Tauri or browser
+        const isTauri = typeof window.__TAURI__ !== 'undefined';
+        
+        // Mock Tauri API for browser testing
+        const invoke = isTauri 
+            ? window.__TAURI__.tauri.invoke 
+            : async (cmd, args) => {
+                console.log('Mock invoke:', cmd, args);
+                if (cmd === 'get_news') {
+                    const response = await fetch('https://goatmmo.com/api/cms/news?limit=3');
+                    const data = await response.json();
+                    return data.data;
+                }
+                if (cmd === 'get_server_status') {
+                    return { login_online: true, char_online: true, map_online: true };
+                }
+                if (cmd === 'get_config') {
+                    return {
+                        app: {
+                            server_name: 'GOATMMO',
+                            bgm_autoplay: false,
+                            video_background_enabled: true,
+                            video_background_file: 'assets/trailer.mp4',
+                            limited_items: []
+                        }
+                    };
+                }
+                return null;
+            };
+        
+        const appWindow = isTauri 
+            ? window.__TAURI__.window.appWindow 
+            : {
+                minimize: () => console.log('Mock: minimize'),
+                close: () => console.log('Mock: close')
+            };
 
         async function minimizeWindow() {
             await appWindow.minimize();
@@ -495,64 +1249,103 @@
         }
 
         let isPatchingComplete = false;
+        let patchesAvailable = 0;
 
-        async function handleStartButton() {
-            const startButton = document.getElementById('start-button');
+        async function checkPatchesOnStartup() {
+            const progressLabel = document.getElementById('progress-label');
+            const playButton = document.getElementById('play-button');
             
-            if (isPatchingComplete || startButton.textContent === 'PLAY NOW') {
+            try {
+                progressLabel.textContent = 'Checking for updates...';
+                playButton.disabled = true;
+                
+                patchesAvailable = await invoke('check_patches_available');
+                
+                if (patchesAvailable > 0) {
+                    progressLabel.textContent = `${patchesAvailable} patch(es) available - Click "Start Update" to download`;
+                    playButton.textContent = 'Start Update';
+                    playButton.disabled = false;
+                    isPatchingComplete = false;
+                } else {
+                    progressLabel.textContent = 'Game is up to date! Ready to play.';
+                    playButton.textContent = 'Play Now';
+                    playButton.disabled = false;
+                    isPatchingComplete = true;
+                }
+            } catch (error) {
+                console.error('Failed to check patches:', error);
+                progressLabel.textContent = 'Unable to check for updates. Click "Play Now" to continue.';
+                playButton.textContent = 'Play Now';
+                playButton.disabled = false;
+                isPatchingComplete = true;
+            }
+        }
+
+        async function handlePlayButton() {
+            const playButton = document.getElementById('play-button');
+            
+            if (isPatchingComplete || playButton.textContent === 'Play Now') {
                 await playGame();
             } else {
                 await startPatching();
             }
         }
 
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
         async function startPatching() {
-            const statusMessage = document.getElementById('status-message');
+            const progressLabel = document.getElementById('progress-label');
             const progressBar = document.getElementById('progress-bar');
-            const startButton = document.getElementById('start-button');
+            const playButton = document.getElementById('play-button');
 
             try {
-                statusMessage.textContent = 'Checking for updates...';
-                startButton.disabled = true;
+                playButton.disabled = true;
                 
-                progressBar.style.width = '30%';
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                progressLabel.textContent = 'Initializing patch process...';
+                progressBar.style.width = '0%';
                 
-                statusMessage.textContent = 'Downloading patches...';
-                progressBar.style.width = '60%';
+                const unlisten = await window.__TAURI__.event.listen('patch-progress', (event) => {
+                    const progress = event.payload;
+                    
+                    const fileProgress = progress.bytes_total > 0 
+                        ? Math.round((progress.bytes_downloaded / progress.bytes_total) * 100)
+                        : 0;
+                    
+                    const overallProgress = progress.total > 0
+                        ? Math.round(((progress.current - 1) / progress.total * 100) + (fileProgress / progress.total))
+                        : 0;
+                    
+                    progressBar.style.width = `${overallProgress}%`;
+                    
+                    if (progress.bytes_total > 0) {
+                        progressLabel.textContent = `${progress.status} - ${fileProgress}% (${formatBytes(progress.bytes_downloaded)} / ${formatBytes(progress.bytes_total)})`;
+                    } else {
+                        progressLabel.textContent = progress.status;
+                    }
+                });
                 
                 await invoke('start_patching');
                 
+                unlisten();
+                
                 progressBar.style.width = '100%';
-                statusMessage.textContent = 'Patching complete!';
+                progressLabel.textContent = 'Patching complete!';
                 isPatchingComplete = true;
                 
-                startButton.textContent = 'PLAY NOW';
-                startButton.disabled = false;
-            } catch (error) {
-                statusMessage.textContent = `Error: ${error}`;
-                startButton.disabled = false;
-            }
-        }
-
-        async function repairGame() {
-            const statusMessage = document.getElementById('status-message');
-            const progressBar = document.getElementById('progress-bar');
-            
-            statusMessage.textContent = 'Verifying game files...';
-            progressBar.style.width = '0%';
-            
-            try {
-                await invoke('verify_game_files');
-                progressBar.style.width = '100%';
-                statusMessage.textContent = 'Verification complete!';
+                playButton.textContent = 'Play Now';
+                playButton.disabled = false;
                 
-                setTimeout(() => {
-                    progressBar.style.width = '0%';
-                    statusMessage.textContent = 'Ready to patch';
-                }, 2000);
+                await checkPatchesOnStartup();
             } catch (error) {
-                statusMessage.textContent = `Repair error: ${error}`;
+                progressLabel.textContent = `Error: ${error}`;
+                playButton.disabled = false;
+                progressBar.style.width = '0%';
             }
         }
 
@@ -564,142 +1357,422 @@
             }
         }
 
-        function openModal(modalType) {
-            closeModal();
-            document.getElementById(`${modalType}-modal`).classList.add('active');
-        }
-
-        function closeModal() {
-            document.querySelectorAll('.modal').forEach(modal => {
-                modal.classList.remove('active');
-            });
-        }
-
-        async function saveSettings() {
-            const resolution = document.getElementById('resolution').value;
-            const graphicsMode = document.getElementById('graphics-mode').value;
-            const soundEnabled = document.getElementById('sound-enabled').checked;
-            const bgmEnabled = document.getElementById('bgm-enabled').checked;
-            
-            const [width, height] = resolution.split('x').map(n => parseInt(n));
-            
-            const settings = {
-                resolution_width: width,
-                resolution_height: height,
-                fullscreen: graphicsMode === 'fullscreen',
-                sound_enabled: soundEnabled,
-                bgm_enabled: bgmEnabled,
-                mouse_freedom: true,
-                vsync: true
-            };
-            
+        async function openSetup() {
             try {
-                await invoke('apply_game_settings', { settings });
-                alert('Settings saved successfully!');
-                closeModal();
+                await invoke('open_setup');
             } catch (error) {
-                alert(`Failed to save settings: ${error}`);
+                alert(`Failed to open setup: ${error}`);
             }
         }
 
-        async function loadGameSettings() {
+        async function manualPatch() {
             try {
-                const settings = await invoke('load_game_settings');
-                
-                const resolution = `${settings.resolution_width}x${settings.resolution_height}`;
-                document.getElementById('resolution').value = resolution;
-                
-                let graphicsMode = 'windowed';
-                if (settings.fullscreen) graphicsMode = 'fullscreen';
-                document.getElementById('graphics-mode').value = graphicsMode;
-                
-                document.getElementById('sound-enabled').checked = settings.sound_enabled;
-                document.getElementById('bgm-enabled').checked = settings.bgm_enabled;
+                await invoke('manual_patch');
             } catch (error) {
-                console.log('No saved settings found, using defaults');
+                alert(`Manual patch failed: ${error}`);
             }
         }
 
-        async function selectGameDirectory() {
-            try {
-                const selected = await window.__TAURI__.dialog.open({
-                    directory: true,
-                    multiple: false,
-                    title: 'Select Ragnarok Online Game Directory'
-                });
-                
-                if (selected) {
-                    await invoke('set_game_directory', { directory: selected });
-                    alert('Game directory set successfully!');
+        async function resetCache() {
+            const confirm = window.confirm('Are you sure you want to reset cache? This will re-download all patches.');
+            if (confirm) {
+                try {
+                    await invoke('reset_cache');
+                    alert('Cache reset successfully!');
+                } catch (error) {
+                    alert(`Failed to reset cache: ${error}`);
                 }
-            } catch (error) {
-                alert(`Failed to set game directory: ${error}`);
             }
         }
 
-        async function loadGameDirectory() {
-            try {
-                const directory = await invoke('get_game_directory');
-            } catch (error) {
-                console.error('Failed to load game directory:', error);
+        let allNewsData = [];
+        let bgmAudio = null;
+        let isMuted = false;
+        let currentVolume = 0.3;
+
+        function toggleMute() {
+            if (!bgmAudio) return;
+            
+            isMuted = !isMuted;
+            const volumeIcon = document.getElementById('volume-icon');
+            
+            if (isMuted) {
+                bgmAudio.volume = 0;
+                volumeIcon.className = 'ph ph-speaker-x';
+            } else {
+                bgmAudio.volume = currentVolume;
+                updateVolumeIcon(currentVolume);
             }
         }
+
+        function changeVolume(value) {
+            if (!bgmAudio) return;
+            
+            currentVolume = value / 100;
+            bgmAudio.volume = currentVolume;
+            document.getElementById('volume-slider').value = value;
+            
+            if (currentVolume > 0) {
+                isMuted = false;
+                updateVolumeIcon(currentVolume);
+            } else {
+                isMuted = true;
+                document.getElementById('volume-icon').className = 'ph ph-speaker-x';
+            }
+        }
+
+        function updateVolumeIcon(volume) {
+            const volumeIcon = document.getElementById('volume-icon');
+            if (volume > 0.5) {
+                volumeIcon.className = 'ph ph-speaker-high';
+            } else if (volume > 0) {
+                volumeIcon.className = 'ph ph-speaker-low';
+            } else {
+                volumeIcon.className = 'ph ph-speaker-x';
+            }
+        }
+
+        function loadSocialButtons(config) {
+            const registerBtn = document.getElementById('register-btn-main');
+            const socialButtonsContainer = document.getElementById('social-buttons-container');
+
+            if (config.app.register_url) {
+                registerBtn.style.display = 'block';
+                registerBtn.onclick = () => window.open(config.app.register_url, '_blank');
+            } else {
+                registerBtn.style.display = 'none';
+            }
+
+            if (config.app.discord_url) {
+                const discordBtn = document.createElement('button');
+                discordBtn.className = 'social-btn-inline';
+                discordBtn.title = 'Discord';
+                discordBtn.onclick = () => window.open(config.app.discord_url, '_blank');
+                
+                const discordIcon = document.createElement('i');
+                discordIcon.className = 'ph ph-discord-logo';
+                discordBtn.appendChild(discordIcon);
+                
+                socialButtonsContainer.appendChild(discordBtn);
+            }
+
+            if (config.app.social_links && config.app.social_links.length > 0) {
+                config.app.social_links.forEach(link => {
+                    const btn = document.createElement('button');
+                    btn.className = 'social-btn-inline';
+                    btn.title = link.name;
+                    btn.onclick = () => window.open(link.url, '_blank');
+                    
+                    const icon = document.createElement('i');
+                    icon.className = `ph ph-${link.icon}`;
+                    btn.appendChild(icon);
+                    
+                    socialButtonsContainer.appendChild(btn);
+                });
+            }
+        }
+
+        function openImageModal(imageSrc) {
+            const modal = document.getElementById('image-modal');
+            const modalImage = document.getElementById('modal-image');
+            modalImage.src = imageSrc;
+            modal.classList.add('active');
+        }
+
+        function closeImageModal() {
+            const modal = document.getElementById('image-modal');
+            modal.classList.remove('active');
+        }
+
+        // Close modal on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeImageModal();
+            }
+        });
+
+        // Disable right-click context menu globally
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            return false;
+        });
+
+        function filterNews(category) {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const newsCards = document.getElementById('news-cards');
+            
+            // Filter news based on category
+            const filteredNews = allNewsData.filter(news => {
+                if (category === 'event') {
+                    return news.category === 'event' || news.category === 'events';
+                } else if (category === 'promo') {
+                    return news.category === 'promo' || news.category === 'promotion';
+                } else if (category === 'update') {
+                    return news.category === 'update' || news.category === 'updates';
+                }
+                return true;
+            });
+            
+            if (filteredNews.length === 0) {
+                newsCards.innerHTML = '<div class="loading">No news in this category</div>';
+                return;
+            }
+            
+            // Render filtered news
+            newsCards.innerHTML = filteredNews.map((news) => {
+                const badgeClass = news.category === 'promo' ? 'promo' : news.category === 'updates' || news.category === 'update' ? 'update' : 'event';
+                const categoryText = news.category === 'promo' ? 'Promo' : news.category === 'updates' || news.category === 'update' ? 'Update' : 'Event';
+                
+                let dateText = '';
+                const dateValue = news.created_at || news.date || news.published_at;
+                if (dateValue) {
+                    const date = new Date(dateValue);
+                    dateText = date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+                }
+                
+                const newsUrl = news.url || `https://goatmmo.com/news/${news.id || ''}`;
+                
+                return `
+                    <div class="news-item" onclick="window.open('${newsUrl}', '_blank')">
+                        <div class="news-badge ${badgeClass}">${categoryText}</div>
+                        <div class="news-content">
+                            <div class="news-title">${news.title || 'News Title'}</div>
+                            ${dateText ? `<div class="news-date">${dateText}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+
+
+
 
         async function updateServerStatus() {
             try {
                 const status = await invoke('get_server_status');
                 
-                const loginStatus = document.getElementById('login-status');
-                const charStatus = document.getElementById('char-status');
-                const mapStatus = document.getElementById('map-status');
+                const loginDot = document.getElementById('login-dot');
+                const charDot = document.getElementById('char-dot');
+                const mapDot = document.getElementById('map-dot');
+                const loginText = document.getElementById('login-text');
+                const charText = document.getElementById('char-text');
+                const mapText = document.getElementById('map-text');
                 
-                loginStatus.textContent = status.login_online ? 'Online' : 'Offline';
-                loginStatus.className = status.login_online ? 'status-value status-online' : 'status-value status-offline';
+                loginDot.className = status.login_online ? 'status-dot' : 'status-dot offline';
+                charDot.className = status.char_online ? 'status-dot' : 'status-dot offline';
+                mapDot.className = status.map_online ? 'status-dot' : 'status-dot offline';
                 
-                charStatus.textContent = status.char_online ? 'Online' : 'Offline';
-                charStatus.className = status.char_online ? 'status-value status-online' : 'status-value status-offline';
+                loginText.className = status.login_online ? 'status-text' : 'status-text offline';
+                charText.className = status.char_online ? 'status-text' : 'status-text offline';
+                mapText.className = status.map_online ? 'status-text' : 'status-text offline';
                 
-                mapStatus.textContent = status.map_online ? 'Online' : 'Offline';
-                mapStatus.className = status.map_online ? 'status-value status-online' : 'status-value status-offline';
+                loginText.textContent = status.login_online ? 'Online' : 'Offline';
+                charText.textContent = status.char_online ? 'Online' : 'Offline';
+                mapText.textContent = status.map_online ? 'Online' : 'Offline';
             } catch (error) {
                 console.error('Failed to get server status:', error);
             }
         }
-        
-        async function updateClientStatus() {
+
+        async function loadNews() {
+            const newsCards = document.getElementById('news-cards');
+            
             try {
-                const status = await invoke('get_client_status');
+                console.log('Loading news...');
+                let newsData = await invoke('get_news');
+                console.log('News data received:', newsData);
                 
-                const clientExeStatus = document.getElementById('client-exe-status');
-                const serverStatus = document.getElementById('server-status');
+                if (!newsData || newsData.length === 0) {
+                    newsCards.innerHTML = '<div class="loading">No news available</div>';
+                    return;
+                }
                 
-                clientExeStatus.textContent = status.client_exe_status;
-                clientExeStatus.className = status.client_exe_status === 'OK' ? 'status-value status-online' : 'status-value status-offline';
+                // Sort by date (newest first)
+                newsData.sort((a, b) => {
+                    const dateA = new Date(a.created_at || a.date || 0);
+                    const dateB = new Date(b.created_at || b.date || 0);
+                    return dateB - dateA;
+                });
                 
-                serverStatus.textContent = status.server_status;
-                serverStatus.className = status.server_status === 'OK' ? 'status-value status-online' : 'status-value status-offline';
+                // Store all news data for filtering
+                allNewsData = newsData;
+                
+                // Filter to show only events by default (since Event button is active)
+                const eventNews = newsData.filter(news => news.category === 'event' || news.category === 'events');
+                const displayNews = eventNews.length > 0 ? eventNews : newsData;
+                
+                newsCards.innerHTML = displayNews.map((news) => {
+                    const badgeClass = news.category === 'promo' ? 'promo' : news.category === 'updates' || news.category === 'update' ? 'update' : 'event';
+                    const categoryText = news.category === 'promo' ? 'Promo' : news.category === 'updates' || news.category === 'update' ? 'Update' : 'Event';
+                    
+                    // Format date - try multiple field names
+                    let dateText = '';
+                    const dateValue = news.created_at || news.date || news.published_at;
+                    if (dateValue) {
+                        const date = new Date(dateValue);
+                        dateText = date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+                    }
+                    
+                    // Create news URL - adjust based on your website structure
+                    const newsUrl = news.url || `https://goatmmo.com/news/${news.id || ''}`;
+                    
+                    return `
+                        <div class="news-item" onclick="window.open('${newsUrl}', '_blank')">
+                            <div class="news-badge ${badgeClass}">${categoryText}</div>
+                            <div class="news-content">
+                                <div class="news-title">${news.title || 'News Title'}</div>
+                                ${dateText ? `<div class="news-date">${dateText}</div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
             } catch (error) {
-                console.error('Failed to get client status:', error);
-                document.getElementById('client-exe-status').textContent = 'Error';
-                document.getElementById('server-status').textContent = 'Error';
+                console.error('Failed to load news:', error);
+                newsCards.innerHTML = `<div class="loading">Error: ${error.toString()}</div>`;
             }
+        }
+
+        async function loadImageGrid(config) {
+            // Default placeholder images
+            const defaultImages = [
+                'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=400&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1614732414444-096e5f1122d5?w=400&h=400&fit=crop'
+            ];
+            
+            console.log('Config:', config);
+            console.log('Grid images from config:', config.app?.grid_images);
+            
+            // Get images from config or use defaults
+            const imageUrls = (config.app && config.app.grid_images) ? config.app.grid_images : defaultImages;
+            console.log('Using images:', imageUrls);
+            
+            // Set images to grid items
+            for (let i = 1; i <= 4; i++) {
+                const img = document.getElementById(`grid-img-${i}`);
+                if (img) {
+                    const imagePath = imageUrls[i - 1] || defaultImages[i - 1];
+                    
+                    // Check if URL or local path
+                    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+                        // Direct URL
+                        img.src = imagePath;
+                    } else if (isTauri) {
+                        // Local asset path - resolve it
+                        try {
+                            const resolvedPath = await invoke('resolve_resource_path', { path: imagePath });
+                            img.src = window.__TAURI__.tauri.convertFileSrc(resolvedPath);
+                        } catch (err) {
+                            console.error(`Failed to load image ${i}:`, err);
+                            img.src = defaultImages[i - 1];
+                        }
+                    } else {
+                        img.src = imagePath;
+                    }
+                    
+                    img.onerror = function() {
+                        this.src = `https://via.placeholder.com/400x400/1a1f2e/6366f1?text=Image+${i}`;
+                    };
+                }
+            }
+        }
+        
+        async function loadStatusImage(imageUrl) {
+            const img = document.getElementById('status-image');
+            const placeholder = document.getElementById('status-placeholder');
+            
+            if (!img || !placeholder) return;
+            
+            try {
+                let finalImageUrl = imageUrl;
+                
+                if (!imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
+                    if (isTauri) {
+                        const resolvedPath = await invoke('resolve_resource_path', { path: imageUrl });
+                        finalImageUrl = window.__TAURI__.tauri.convertFileSrc(resolvedPath);
+                    }
+                }
+                
+                img.src = finalImageUrl;
+                
+                img.onload = function() {
+                    img.style.display = 'block';
+                    placeholder.style.display = 'none';
+                };
+                
+                img.onerror = function() {
+                    console.error('Failed to load status image');
+                    img.style.display = 'none';
+                    placeholder.style.display = 'flex';
+                };
+            } catch (err) {
+                console.error('Error loading status image:', err);
+                img.style.display = 'none';
+                placeholder.style.display = 'flex';
+            }
+        }
+
+        async function promptGameDirectorySelection() {
+            try {
+                const result = await window.__TAURI__.dialog.message(
+                    'Welcome! Please select your game directory to continue.\n\nThe patcher will search for the game executable in both the selected directory and the patcher folder.',
+                    { title: 'Initial Setup', type: 'info', okLabel: 'Select Directory' }
+                );
+                
+                try {
+                    const directory = await invoke('select_game_directory');
+                    await window.__TAURI__.dialog.message(
+                        `Game directory set to: ${directory}\n\nConfiguration saved successfully!`,
+                        { title: 'Setup Complete', type: 'info' }
+                    );
+                    
+                    const config = await invoke('get_config');
+                    return config;
+                } catch (err) {
+                    console.error('Failed to select directory:', err);
+                    await window.__TAURI__.dialog.message(
+                        'No directory selected. The patcher will look for game files in the patcher folder.\n\nYou can set the game directory later from settings.',
+                        { title: 'Setup Skipped', type: 'warning' }
+                    );
+                }
+            } catch (err) {
+                console.error('Error in initial setup:', err);
+            }
+            
+            return await invoke('get_config');
         }
 
         window.addEventListener('DOMContentLoaded', async () => {
             updateServerStatus();
-            updateClientStatus();
-            
             setInterval(updateServerStatus, 30000);
-            setInterval(updateClientStatus, 30000);
             
-            await loadGameDirectory();
-            await loadGameSettings();
+            let config = await invoke('get_config');
             
-            const config = await invoke('get_config');
+            const needsSetup = await invoke('check_initial_setup');
+            if (needsSetup && isTauri) {
+                config = await promptGameDirectorySelection();
+            }
             
             if (config.app.server_name) {
-                document.getElementById('server-title').textContent = config.app.server_name;
-                document.getElementById('header-title').textContent = config.app.server_name + ' PATCHER';
+                document.getElementById('logo-text').textContent = config.app.server_name;
+            }
+            
+            // Load news cards
+            await loadNews();
+            
+            // Load image grid
+            await loadImageGrid(config);
+            
+            // Load social buttons
+            loadSocialButtons(config);
+            
+            // Load status image if configured
+            if (config.ui.status_image_url) {
+                loadStatusImage(config.ui.status_image_url);
             }
             
             if (config.app.bgm_autoplay && config.app.bgm_file) {
@@ -709,16 +1782,34 @@
             if (config.app.video_background_enabled && config.app.video_background_file) {
                 await playVideoBackground(config.app.video_background_file);
             }
+            
+            if (isTauri) {
+                await checkPatchesOnStartup();
+            }
         });
         
         async function playBackgroundMusic(bgmPath) {
             try {
-                const resolvedPath = await invoke('resolve_resource_path', { path: bgmPath });
-                const assetUrl = window.__TAURI__.tauri.convertFileSrc(resolvedPath);
-                const audio = new Audio(assetUrl);
-                audio.loop = true;
-                audio.volume = 0.3;
-                audio.play().catch(err => console.log('BGM autoplay failed:', err));
+                let audioUrl;
+                
+                // Check if URL or local path
+                if (bgmPath.startsWith('http://') || bgmPath.startsWith('https://')) {
+                    // Direct URL
+                    audioUrl = bgmPath;
+                } else {
+                    // Local asset path - resolve it
+                    const resolvedPath = await invoke('resolve_resource_path', { path: bgmPath });
+                    audioUrl = window.__TAURI__.tauri.convertFileSrc(resolvedPath);
+                }
+                
+                bgmAudio = new Audio(audioUrl);
+                bgmAudio.loop = true;
+                bgmAudio.volume = currentVolume;
+                bgmAudio.play().catch(err => console.log('BGM autoplay failed:', err));
+                
+                // Update volume slider
+                document.getElementById('volume-slider').value = currentVolume * 100;
+                updateVolumeIcon(currentVolume);
             } catch (err) {
                 console.error('Failed to load BGM:', err);
             }
@@ -726,23 +1817,25 @@
         
         async function playVideoBackground(videoPath) {
             try {
-                const resolvedPath = await invoke('resolve_resource_path', { path: videoPath });
-                const assetUrl = window.__TAURI__.tauri.convertFileSrc(resolvedPath);
+                let videoUrl;
+                
+                // Check if URL or local path
+                if (videoPath.startsWith('http://') || videoPath.startsWith('https://')) {
+                    // Direct URL
+                    videoUrl = videoPath;
+                } else {
+                    // Local asset path - resolve it
+                    const resolvedPath = await invoke('resolve_resource_path', { path: videoPath });
+                    videoUrl = window.__TAURI__.tauri.convertFileSrc(resolvedPath);
+                }
+                
                 const video = document.getElementById('video-background');
-                video.src = assetUrl;
+                video.src = videoUrl;
                 video.load();
             } catch (err) {
                 console.error('Failed to load video:', err);
             }
         }
-
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    closeModal();
-                }
-            });
-        });
     </script>
 </body>
 </html>

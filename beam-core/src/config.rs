@@ -13,6 +13,19 @@ pub struct Config {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LimitedItem {
+    pub image_url: String,
+    pub label: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SocialLink {
+    pub name: String,
+    pub icon: String,
+    pub url: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AppConfig {
     pub name: String,
     pub version: String,
@@ -25,6 +38,11 @@ pub struct AppConfig {
     pub server_name: Option<String>,
     pub video_background_enabled: Option<bool>,
     pub video_background_file: Option<String>,
+    pub grid_images: Option<Vec<String>>,
+    pub limited_items: Option<Vec<LimitedItem>>,
+    pub social_links: Option<Vec<SocialLink>>,
+    pub discord_url: Option<String>,
+    pub register_url: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -53,6 +71,7 @@ pub struct UiConfig {
     pub show_file_list: bool,
     pub news_feed_url: Option<String>,
     pub server_status_url: Option<String>,
+    pub status_image_url: Option<String>,
     pub custom_buttons: Vec<CustomButton>,
     pub layout: LayoutConfig,
 }
@@ -149,6 +168,11 @@ impl Config {
                 server_name: Some("MyRO".to_string()),
                 video_background_enabled: Some(false),
                 video_background_file: None,
+                grid_images: None,
+                limited_items: None,
+                social_links: None,
+                discord_url: None,
+                register_url: None,
             },
             patcher: PatcherConfig {
                 mirrors: vec![
@@ -172,6 +196,7 @@ impl Config {
                 show_file_list: true,
                 news_feed_url: None,
                 server_status_url: None,
+                status_image_url: None,
                 custom_buttons: vec![],
                 layout: LayoutConfig {
                     width: 800,

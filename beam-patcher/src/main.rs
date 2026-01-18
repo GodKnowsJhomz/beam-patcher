@@ -27,12 +27,22 @@ async fn main() -> Result<()> {
     
     let args = Args::parse();
     
-    let config = if std::path::Path::new(&args.config).exists() {
-        Config::load(&args.config)?
+    let config_path = if std::path::Path::new(&args.config).is_absolute() {
+        std::path::PathBuf::from(&args.config)
     } else {
-        tracing::warn!("Config file not found, creating default config");
+        let exe_dir = std::env::current_exe()?
+            .parent()
+            .ok_or_else(|| anyhow::anyhow!("Failed to get executable directory"))?
+            .to_path_buf();
+        exe_dir.join(&args.config)
+    };
+    
+    let config = if config_path.exists() {
+        Config::load(&config_path)?
+    } else {
+        tracing::warn!("Config file not found at {:?}, creating default config", config_path);
         let config = Config::default();
-        config.save(&args.config)?;
+        config.save(&config_path)?;
         config
     };
     
